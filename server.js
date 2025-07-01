@@ -18,7 +18,9 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: "https://bookify-official.netlify.app"
+}));
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 app.use(helmet());
