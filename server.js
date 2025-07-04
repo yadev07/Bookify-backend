@@ -19,7 +19,20 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: "https://bookify-official.netlify.app"
+  origin: function(origin, callback) {
+    // allow requests with no origin (like mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    const allowedOrigins = [
+      process.env.FRONTEND_URL || 'https://bookify-official.netlify.app',
+      'http://localhost:3000'
+    ];
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
 }));
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
