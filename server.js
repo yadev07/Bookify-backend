@@ -18,22 +18,22 @@ dotenv.config();
 const app = express();
 
 // Middleware
-app.use(cors({
-  origin: function(origin, callback) {
-    // allow requests with no origin (like mobile apps, curl, etc.)
-    if (!origin) return callback(null, true);
-    const allowedOrigins = [
-      process.env.FRONTEND_URL || 'https://bookify-official.netlify.app',
-      'http://localhost:3000'
-    ];
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true
-}));
+// --- CORS CONFIGURATION ---
+const allowedOrigins = [
+  process.env.FRONTEND_URL || 'https://bookify-official.netlify.app',
+  'http://localhost:3000'
+];
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', allowedOrigins.includes(req.headers.origin) ? req.headers.origin : '');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+// --- END CORS CONFIGURATION ---
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 app.use(helmet());
@@ -61,6 +61,10 @@ app.use('/api/user', userRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/admin', adminRoutes);
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok' });
+});
 
 // Error handling middleware
 app.set('trust proxy', 1);
