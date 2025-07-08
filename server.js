@@ -54,9 +54,4 @@ app.use('/api/admin', adminRoutes);
 app.set('trust proxy', 1);
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5100;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
-
 module.exports = app; 
