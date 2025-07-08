@@ -11,6 +11,7 @@ const serviceRoutes = require('./routes/service');
 const userRoutes = require('./routes/user');
 const appointmentRoutes = require('./routes/appointment');
 const adminRoutes = require('./routes/admin');
+const errorHandler = require('./middlewares/errorHandler');
 
 // Load env variables
 dotenv.config();
@@ -18,11 +19,7 @@ dotenv.config();
 const app = express();
 
 // Middleware
-// --- CORS CONFIGURATION ---
-app.use(cors({
-  origin: "https://bookify-official.netlify.app", credentials: true
-}))
-// --- END CORS CONFIGURATION ---
+app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
 app.use(helmet());
@@ -50,19 +47,11 @@ app.use('/api/user', userRoutes);
 app.use('/api/appointments', appointmentRoutes);
 app.use('/api/admin', adminRoutes);
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok' });
-});
-
 // Error handling middleware
 app.set('trust proxy', 1);
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Server Error', error: err.message });
-});
+app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5100;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

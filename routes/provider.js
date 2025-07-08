@@ -51,11 +51,13 @@ router.get('/public/:providerId/available-slots', async (req, res) => {
 // Profile routes
 router.get('/profile', auth(['provider']), providerController.getProfile);
 router.put('/profile', auth(['provider']), providerController.updateProfile);
-router.post('/profile/picture', auth(['provider']), upload.single('profilePic'), (req, res) => {
+router.post('/profile/picture', auth(['provider']), upload.single('profilePic'), async (req, res) => {
   if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
   req.user.profilePic = `/uploads/${req.file.filename}`;
-  req.user.save();
-  res.json({ profilePic: req.user.profilePic });
+  req.user.profile = `/uploads/${req.file.filename}`;
+  await req.user.save();
+  const provider = await require('../models/Provider').findById(req.user._id).select('-password');
+  res.json(provider);
 });
 
 // Availability management

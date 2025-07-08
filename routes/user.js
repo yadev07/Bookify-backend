@@ -19,12 +19,13 @@ router.get('/provider-slots', auth(['user']), userController.getProviderAvailabl
 // Dashboard
 router.get('/dashboard', auth(['user']), userController.getDashboard);
 
-router.post('/profile/picture', auth(['user']), upload.single('profilePic'), (req, res) => {
-  // Controller logic will update user profilePic field
+router.post('/profile/picture', auth(['user']), upload.single('profilePic'), async (req, res) => {
   if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
   req.user.profilePic = `/uploads/${req.file.filename}`;
-  req.user.save();
-  res.json({ profilePic: req.user.profilePic });
+  req.user.profile = `/uploads/${req.file.filename}`;
+  await req.user.save();
+  const user = await require('../models/User').findById(req.user._id).select('-password');
+  res.json(user);
 });
 
 module.exports = router; 
